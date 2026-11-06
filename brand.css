@@ -1,0 +1,48 @@
+/* Brand refresh: Urban / black / copper / gold */
+:root{--dark:#080809!important;--lime:#df9b54!important;--muted:#aa9d91!important;--metal:#d6a06b;--copper:#bd6d43;--gold:#c69a52}
+html{scroll-behavior:smooth}
+body{background:#080809!important;color:#f5eee8!important;font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif!important}
+header{background:rgba(6,6,7,.96)!important;border-bottom:1px solid rgba(215,154,91,.25)!important;position:sticky;top:0;z-index:20;backdrop-filter:blur(15px)}
+header .nav{min-height:82px!important}
+.logo{display:flex;align-items:center;gap:10px;font-size:clamp(16px,2vw,23px)!important;letter-spacing:-.7px!important;color:#fff!important;text-transform:uppercase;font-weight:900!important}
+.logo:before{content:"";display:inline-block;width:33px;height:42px;flex-shrink:0;background:linear-gradient(135deg,#f5c882,#a75d36);clip-path:polygon(30% 0,72% 0,72% 12%,89% 12%,89% 90%,68% 90%,68% 100%,28% 100%,28% 90%,12% 90%,12% 12%,30% 12%);filter:drop-shadow(0 0 12px #ae632e60)}
+.logo span{color:#df9b54!important}
+nav a{color:#e9dfd5!important;font-weight:700!important}
+nav a:hover{color:#ffc482!important}
+h1,h2,h3{color:#fff!important}
+h1{font-weight:950!important;text-transform:uppercase;letter-spacing:-2px!important}
+h1 em{color:#e0a368!important}
+h2{font-weight:850!important}
+p{color:#d1c6bc}
+.muted,.card .muted{color:#a99a8c!important}
+.hero{position:relative;isolation:isolate;overflow:hidden;background:radial-gradient(ellipse at 72% 42%,#683a26 0%,#2e1c18 23%,#0b0a0b 62%,#050505 100%)!important;border-bottom:1px solid #653b29}
+.hero::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;background:radial-gradient(circle at 80% 20%,#f2b87024 0 1.2px,transparent 2px),radial-gradient(circle at 68% 60%,#ce764d35 0 2px,transparent 3px),linear-gradient(110deg,transparent 55%,#ad6a3317 75%,transparent);background-size:47px 47px,73px 73px,100% 100%;transform:rotate(-6deg) scale(1.1)}
+.eyebrow,.hero small,.tag{color:#e6a569!important}
+.hero .wrap{position:relative}
+.hero p,p.lead{color:#dfd0c2!important}
+.btn,button[type=submit]{background:linear-gradient(110deg,#e2ae72,#b96b42)!important;color:#150e0a!important;border:1px solid #edbc82!important;box-shadow:0 8px 25px #9f4e2e31;font-weight:900!important}
+.btn:hover,button[type=submit]:hover{filter:brightness(1.1);transform:translateY(-2px)}
+.info,.warn{background:#261b17!important;color:#e6c69d!important;border-color:#9c613a!important}
+.section{background:#09090b}
+.card{background:linear-gradient(145deg,#211b1c,#151416)!important;border:1px solid #63452e!important;color:#f3e8df!important;box-shadow:0 12px 36px #0005}
+.card p{color:#d2c2b4!important}
+.card small,.tag{color:#dda369!important}
+.card a{color:#f5be80!important}
+input,textarea,select,.search,.input{background:#191719!important;border:1px solid #68462e!important;color:#fff!important}
+input::placeholder,textarea::placeholder{color:#9b8d82}
+.filters button{background:#1c191a!important;color:#e9dac9!important;border:1px solid #60432e!important}
+.filters button.active{background:linear-gradient(110deg,#c4844e,#744029)!important;border-color:#d39a62!important;color:#fff!important}
+.contact{background:linear-gradient(115deg,#1b1110,#090909)!important;border-top:1px solid #654027}
+footer{background:#040404!important;color:#b7a99d!important;border-top:1px solid #4d3127}
+footer a{color:#d5a779!important}
+a{transition:color .2s ease}
+.brand-hero{min-height:450px;display:grid;grid-template-columns:minmax(0,1.2fr) minmax(260px,1fr);gap:28px;align-items:center}
+.brand-visual{display:grid;place-items:center;position:relative;min-height:350px}
+.brand-visual:before{content:"";position:absolute;width:90%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#c77e4c77 0%,#6c3a2c55 40%,transparent 67%);filter:blur(10px)}
+.brand-visual:after{content:"24/7 · VENDING · SNACKS";font-size:clamp(11px,1.5vw,17px);letter-spacing:.28em;font-weight:1000;color:#efc18c;text-shadow:0 4px 15px #000;position:absolute;bottom:2%;text-align:center}
+.brand-original{display:block;position:relative;max-height:500px;width:100%;object-fit:contain;filter:drop-shadow(0 10px 27px #080808);z-index:1}
+.brand-logo-fallback{display:grid;place-items:center;position:relative;width:75%;aspect-ratio:1;border:7px solid #c98d58;border-radius:50%;background:radial-gradient(circle,#493025,#090909 73%);font-size:clamp(35px,6vw,78px);font-weight:950;letter-spacing:-.07em;color:#ffe1ba;transform:rotate(-9deg);box-shadow:0 0 80px #ac623a44,inset 0 0 40px #b86d2f33}
+.brand-logo-fallback:before{content:"DEIN";position:absolute;top:10%;font-size:clamp(12px,2vw,23px);letter-spacing:.2em;transform:rotate(-12deg)}
+.brand-logo-fallback:after{content:"SNACKAUTOMAT";position:absolute;bottom:10%;font-size:clamp(10px,1.6vw,20px);letter-spacing:.06em}
+@media(max-width:780px){.brand-hero{grid-template-columns:1fr}.brand-visual{min-height:260px;order:-1}.brand-logo-fallback{max-width:245px}.brand-original{max-height:300px}}
+@media(max-width:540px){.logo:before{width:25px;height:32px}header .nav{min-height:64px!important}.hero{padding:58px 0!important}}
