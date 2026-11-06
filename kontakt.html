@@ -18,6 +18,18 @@
 <p id="hinweis" role="status" aria-live="polite" class="muted" style="min-height:1.5em"></p>
 </form></section><section class="card"><h2>Direkter Kontakt</h2><p><strong>H&amp;K Projekt UG (haftungsbeschränkt)</strong><br>Lehmkoppel 7<br>25499 Tangstedt</p><p><strong>Telefon:</strong><br><a href="tel:+4941016012870">04101 / 601287-0</a></p><p><strong>E-Mail:</strong><br><a href="mailto:info@dein-snackautomat.de">info@dein-snackautomat.de</a></p><p class="muted">Für eine möglichst konkrete Antwort gerne den gewünschten Automaten oder Einsatzort angeben.</p></section></div></div></main><footer><div class="wrap"><div class="site-links"><a href="ueber-uns.html">Über uns</a><a href="referenzen.html">Referenzen</a><a href="kontakt.html">Kontakt</a><a href="impressum.html">Impressum</a> · <a href="datenschutz.html">Datenschutz</a></div><p>dein-snackautomat.de · H&amp;K Projekt UG (haftungsbeschränkt) · Testversion</p></div></footer><script>
 const form=document.getElementById("anfrage");
+const query=new URLSearchParams(window.location.search);
+const requestedProduct=query.get("produkt");
+const requestedTopic=query.get("thema");
+if(requestedTopic){
+  const topicField=form.elements.namedItem("thema");
+  if([...topicField.options].some(option=>option.value===requestedTopic))topicField.value=requestedTopic;
+}
+if(requestedProduct){
+  const messageField=form.elements.namedItem("nachricht");
+  messageField.value="Ich interessiere mich für folgendes Produkt: "+requestedProduct+"\n\nBitte senden Sie mir weitere Informationen und ein Angebot.\n\n";
+  form.elements.namedItem("subject").value="Produktanfrage: "+requestedProduct;
+}
 const statusEl=document.getElementById("hinweis");
 const submitButton=document.getElementById("absenden");
 form.addEventListener("submit",async function(event){
