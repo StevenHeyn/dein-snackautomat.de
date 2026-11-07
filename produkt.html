@@ -14,6 +14,7 @@ if(technical){
  const fields=[["Variante",technical.variant],["Abmessungen H × B × T",technical.dimensions],["Nettogewicht",technical.weight],["Maximale Auswahlen",technical.selections],["Innenraumtemperatur",technical.temperature],["Max. Leistungsaufnahme",technical.power],["Schutzklasse",technical.ip],["Elektroanschluss",technical.voltage]];
  const box=document.getElementById("spec-info");box.textContent="";
  for(const [label,value] of fields){if(!value)continue;const line=document.createElement("div");line.className="spec";const key=document.createElement("span");key.textContent=label;const val=document.createElement("strong");val.textContent=value;line.append(key,val);box.append(line)}
+ for(const [label,value] of (technical.extras||[])){const line=document.createElement("div");line.className="spec";const key=document.createElement("span");key.textContent=label;const val=document.createElement("strong");val.textContent=value;line.append(key,val);box.append(line)}
 }else{document.getElementById("spec-info").textContent="Technische Daten zur gewählten Modellvariante erhalten Sie auf Anfrage.";}
 document.getElementById("photo-label").textContent=p.type+" · "+p.brand;
 const subject="kontakt.html?produkt="+encodeURIComponent(p.name)+"&thema="+encodeURIComponent(p.type==="Snack"?"Snackautomat":p.type==="Getränke"?"Getränkeautomat":p.type==="Kaffee"?"Kaffeeautomat":p.type==="Unterhaltungsautomaten"?"Unterhaltungsautomaten":"Zubehör");
