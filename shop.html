@@ -37,7 +37,7 @@ let cart={};try{const raw=JSON.parse(localStorage.getItem(storageKey)||"{}");for
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function persist(){try{localStorage.setItem(storageKey,JSON.stringify(cart))}catch(_){}}
-let tab=new URLSearchParams(location.search).get("bereich")==="zubehoer"?"accessories":"services";
+const initialArea=new URLSearchParams(location.search).get("bereich");let tab=initialArea==="zubehoer"?"accessories":initialArea==="ersatzteile"?"spares":"services";
 function renderAccessories(){
 const nav=$("accessory-nav");nav.hidden=selectedAccessory===null;
 const src=accessoryGroups;
