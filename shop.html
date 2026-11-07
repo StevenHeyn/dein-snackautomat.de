@@ -36,7 +36,7 @@ let cart={};try{const raw=JSON.parse(localStorage.getItem(storageKey)||"{}");for
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function persist(){try{localStorage.setItem(storageKey,JSON.stringify(cart))}catch(_){}}
-let tab="services";
+let tab=new URLSearchParams(location.search).get("bereich")==="zubehoer"?"accessories":"services";
 function renderAccessories(){
 const nav=$("accessory-nav");nav.hidden=selectedAccessory===null;
 const src=accessoryGroups;
@@ -92,6 +92,6 @@ const summary="Unverbindliche Bestellanfrage (keine Online-Zahlung)\n"+lines.joi
 const url="kontakt.html?thema=Notfallhilfe&warenkorb="+encodeURIComponent(summary);
 window.location.href=url;
 });
-renderCatalog();renderCart();
+document.querySelectorAll("[data-tab]").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));renderCatalog();renderCart();
 })();
 </script></body></html>
