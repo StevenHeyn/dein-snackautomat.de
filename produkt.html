@@ -16,7 +16,7 @@ if(technical){
  for(const [label,value] of fields){if(!value)continue;const line=document.createElement("div");line.className="spec";const key=document.createElement("span");key.textContent=label;const val=document.createElement("strong");val.textContent=value;line.append(key,val);box.append(line)}
 }else{document.getElementById("spec-info").textContent="Technische Daten zur gewählten Modellvariante erhalten Sie auf Anfrage.";}
 document.getElementById("photo-label").textContent=p.type+" · "+p.brand;
-const subject="kontakt.html?produkt="+encodeURIComponent(p.name)+"&thema="+encodeURIComponent(p.type==="Snack"?"Snackautomat":p.type==="Getränke"?"Getränkeautomat":p.type==="Kaffee"?"Kaffeeautomat":"Zubehör");
+const subject="kontakt.html?produkt="+encodeURIComponent(p.name)+"&thema="+encodeURIComponent(p.type==="Snack"?"Snackautomat":p.type==="Getränke"?"Getränkeautomat":p.type==="Kaffee"?"Kaffeeautomat":p.type==="Unterhaltungsautomaten"?"Unterhaltungsautomaten":"Zubehör");
 document.getElementById("enquire").href=subject;document.getElementById("pdf-enquiry").href=subject;
 const previewSlots={"G-Snack Design Touch":"0% 50%","G-Snack Budget":"33.333% 50%","G-Drink Outdoor":"66.667% 50%","Barista 600 Touch":"100% 50%"};
 if(previewSlots[p.name]){const preview=document.getElementById("product-preview");preview.style.display="block";preview.style.backgroundPosition=previewSlots[p.name];document.getElementById("photo-label").style.display="none"}
