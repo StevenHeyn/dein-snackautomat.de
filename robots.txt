@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dein-snackautomat.de/sitemap.xml
