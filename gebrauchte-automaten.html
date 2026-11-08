@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gebrauchte Automaten kaufen | dein-snackautomat.de</title>
+<meta name="description" content="Gebrauchte Snackautomaten, Kaffeeautomaten und Getränkeautomaten für Geschäftskunden entdecken und unverbindlich anfragen.">
+<link rel="canonical" href="https://dein-snackautomat.de/gebrauchte-automaten.html"><link rel="stylesheet" href="brand.css">
+<style>
+*{box-sizing:border-box}body{margin:0;background:#080809;color:#f5eee8;font:16px/1.6 system-ui,Arial,sans-serif}
+.wrap{width:min(1140px,100%);margin:auto;padding:0 22px}header{border-bottom:1px solid #69452f;background:#090909;padding:20px 0}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap}a{color:#e4a46c}header a{text-decoration:none;font-weight:750}
+.hero{padding:75px 0 55px;background:radial-gradient(circle at 80% 40%,#57301e,#09090a 65%)}
+h1{font-size:clamp(34px,6vw,60px);line-height:1.13;margin:10px 0 20px}h2{font-size:27px}p{color:#d6c6b9}
+.lead{font-size:19px;max-width:730px}.tag{font-weight:800;color:#e3a56f;text-transform:uppercase;letter-spacing:2px;font-size:12px}
+main{padding:50px 0 90px}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.card{overflow:hidden;border:1px solid #65432d;border-radius:15px;background:#1b1719;padding:22px}
+.card img{width:100%;height:220px;object-fit:contain;background:#090909;border-radius:10px}
+.card h3{margin:15px 0 7px}.card p{margin:5px 0}.price{font-size:22px;font-weight:850;color:#eec08d}
+.button{display:inline-block;background:linear-gradient(110deg,#e2ae72,#b96b42);border-radius:9px;color:#140d09;padding:12px 18px;font-weight:850;text-decoration:none;margin-top:14px}
+.empty{border:1px dashed #88664a;border-radius:16px;padding:35px;background:#191416}
+footer{border-top:1px solid #543927;padding:30px 0}footer a{margin-right:18px}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:550px){.grid{grid-template-columns:1fr}}
+</style></head>
+<body><header><div class="wrap"><a href="index.html">DEIN-SNACKAUTOMAT.DE</a><nav><a href="index.html#produkte">Neue Automaten</a> &nbsp; <a href="shop.html">B2B-Shop</a> &nbsp; <a href="kontakt.html">Kontakt</a></nav></div></header>
+<section class="hero"><div class="wrap"><span class="tag">Hanse Vend · Gebrauchtgeräte</span><h1>Gebrauchte Automaten kaufen</h1><p class="lead">Entdecke verfügbare gebrauchte Snackautomaten, Getränkeautomaten und Kaffeeautomaten. Individuelle Angebote für gewerbliche Kunden.</p><a class="button" href="kontakt.html">Gebrauchtgerät anfragen</a></div></section>
+<main class="wrap"><h2>Aktuell verfügbare Geräte</h2><p>Unser Gebrauchtgerätebestand wird hier angezeigt, sobald die Inserate für die Veröffentlichung freigegeben und hinterlegt sind. Angaben und Verfügbarkeit auf Anfrage.</p><div id="inventory" class="grid" aria-live="polite"></div><div id="empty" class="empty" hidden>Aktuell sind hier keine bestätigten Gebrauchtgeräte hinterlegt. <a href="kontakt.html">Frag uns nach verfügbaren Automaten.</a></div></main>
+<footer><div class="wrap"><a href="index.html">Startseite</a><a href="impressum.html">Impressum</a><a href="datenschutz.html">Datenschutz</a><p>Ausschließlich für Geschäftskunden. Alle Angebote freibleibend.</p></div></footer>
+<script>
+(async function(){
+ const grid=document.getElementById('inventory'),empty=document.getElementById('empty');
+ try{
+  const response=await fetch('gebrauchte-automaten.json?ts='+Date.now(),{cache:'no-store'});
+  if(!response.ok)throw new Error('inventory unavailable');
+  const entries=await response.json();
+  if(!Array.isArray(entries))throw new Error('invalid inventory');
+  const active=entries.filter(x=>x&&x.active===true&&x.title&&x.url);
+  if(!active.length){empty.hidden=false;return;}
+  for(const item of active){
+    const card=document.createElement('article');card.className='card';
+    if(item.image){const img=document.createElement('img');img.src=item.image;img.alt=item.title;img.loading='lazy';card.append(img);}
+    const title=document.createElement('h3');title.textContent=item.title;card.append(title);
+    if(item.description){const description=document.createElement('p');description.textContent=item.description;card.append(description);}
+    if(item.price){const price=document.createElement('p');price.className='price';price.textContent=String(item.price);card.append(price);}
+    const link=document.createElement('a');link.className='button';link.href=item.url;link.textContent='Angebot ansehen';link.target='_blank';link.rel='noopener noreferrer';card.append(link);grid.append(card);
+  }
+ }catch(e){empty.hidden=false;}
+})();
+</script></body></html>
