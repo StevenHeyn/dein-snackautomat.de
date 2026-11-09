@@ -7,19 +7,20 @@
  */
 const { randomUUID } = require("node:crypto");
 
-const CATALOG_FILES = [
-  "../ersatzteile-barista1000.js",
-  "../ersatzteile-barista600.js",
-  "../ersatzteile-barista500.js",
-  "../ersatzteile-maestro-barista200-300.js",
-];
+function loadCatalogScripts() {
+  // Static require calls allow Vercel's bundler to include the catalog files.
+  require("../ersatzteile-barista1000.js");
+  require("../ersatzteile-barista600.js");
+  require("../ersatzteile-barista500.js");
+  require("../ersatzteile-maestro-barista200-300.js");
+}
 
 function buildCatalog() {
   const previousWindow = global.window;
   const w = { VENDING_SPARE_PARTS: {} };
   try {
     global.window = w;
-    for (const file of CATALOG_FILES) require(file);
+    loadCatalogScripts();
   } finally {
     if (previousWindow === undefined) delete global.window;
     else global.window = previousWindow;
