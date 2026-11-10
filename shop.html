@@ -117,7 +117,6 @@ if(spareMachine===null){
 const groups=spareMachines[spareMachine]||[];
 if(spareGroup===null){
  $("section-title").textContent=spareMachine+" – Baugruppen";
- $("spare-search").value="";
  $("spare-search").hidden=false;
  $("spare-count").textContent=groups.reduce((n,g)=>n+g.items.length,0)+" Ersatzteilpositionen in "+groups.length+" Baugruppen";
  const allTerm=$("spare-search").value.trim().toLocaleLowerCase("de");
