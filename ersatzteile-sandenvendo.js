@@ -1,4 +1,4 @@
-// HEST SandenVendo Ersatzteile. Quelle: HEST Preisliste Ersatzteile.pdf (80 Seiten).
+// SandenVendo Ersatzteilkatalog mit Listenpreisen.
 // Preise: Listenpreise unverändert aus PDF; keine Evoca-Rabattumrechnung.
 // Modellkompatibilität nicht automatisch garantiert.
 window.VENDING_SPARE_PARTS=window.VENDING_SPARE_PARTS||{};
