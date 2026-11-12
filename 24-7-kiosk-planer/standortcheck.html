@@ -12,7 +12,7 @@
 </section>
 <section class="card"><h2>2. Nachfrage & Kaufkraft</h2><p class="muted">Bevölkerungs- und Kaufkraftdaten sind nicht automatisch verfügbar. Bitte aus einer belastbaren Quelle übernehmen oder leer lassen. Wir zeigen keine erfundenen Regionalwerte.</p>
 <div class="two"><label class="field">Einwohner im gewählten Einzugsgebiet<input id="population" type="number" min="0" step="100" placeholder="z. B. 6500"><small>Aus Zensus-Rasterdaten / belastbarer Auswertung.</small></label><label class="field">Kaufkraftindex (Deutschland = 100)<input id="purchase" type="number" min="40" max="220" step="1" placeholder="z. B. 104"><small>Regional-/PLZ-Wert inkl. Quellenjahr.</small></label></div>
-<div class="two"><label class="field">Quelle/Jahr Einwohnerzahl<input id="populationSource" type="text" maxlength="110" placeholder="z. B. Zensus 2022, 1-km-Raster"></label><label class="field">Quelle/Jahr Kaufkraft<input id="purchaseSource" type="text" maxlength="110" placeholder="z. B. MB-Research 2026, PLZ"></label></div>
+<div class="buttons"><button class="btn secondary" type="button" id="census" disabled>Einwohner aus Zensus-Raster abrufen</button></div><div id="censusStatus" class="state">Zuerst Standort recherchieren. Datenquelle: externer ArcGIS-Spiegel der Zensus-2022-Raster.</div><div class="two"><label class="field">Quelle/Jahr Einwohnerzahl<input id="populationSource" type="text" maxlength="110" placeholder="z. B. Zensus 2022, 1-km-Raster"></label><label class="field">Quelle/Jahr Kaufkraft<input id="purchaseSource" type="text" maxlength="110" placeholder="z. B. MB-Research 2026, PLZ"></label></div>
 <div class="two"><label class="field">Sichtbarkeit<select id="visibility"><option value="3">Sehr gut, direkt an Laufweg</option><option value="2" selected>Gut erkennbar</option><option value="1">Eingeschränkt</option><option value="0">Versteckt / schlechte Lage</option></select></label><label class="field">24/7 erreichbar<select id="access"><option value="1" selected>Ja</option><option value="0">Nein / ungeklärt</option></select></label></div>
 <div class="two"><label class="field">Wettbewerb aus Vor-Ort-Prüfung<select id="rivals"><option value="0" selected>Nicht geprüft</option><option value="1">Wenig direkte Automatenkonkurrenz</option><option value="2">Einige direkte Automaten in der Nähe</option><option value="3">Viele ähnliche Angebote</option></select></label><label class="field">Strom & Standortgenehmigung<select id="readiness"><option value="1" selected>Beides geklärt</option><option value="0">Noch zu klären</option><option value="-1">Nicht gegeben</option></select></label></div>
 <div class="sourceLinks"><a href="https://www.destatis.de/DE/Service/Statistik-Visualisiert/zensus-atlas.html" target="_blank" rel="noopener noreferrer">Einwohner prüfen: Zensus-Atlas 2022</a><a href="https://mb-research.de/de/deutschland/kaufkraft/" target="_blank" rel="noopener noreferrer">Kaufkraft: Daten und Methodik</a></div></section>
@@ -32,7 +32,7 @@
 (function(){
 "use strict";
 const $=id=>document.getElementById(id),num=id=>{let v=$(id).value;return v===""?null:Number(v)},nf=new Intl.NumberFormat("de-DE",{maximumFractionDigits:0}),money=n=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
-let geo=null,poi=null,busy=false;const inputs=["radius","areaType","population","purchase","populationSource","purchaseSource","visibility","access","rivals","readiness","passers","conversion","basket","margin","vat","fees","loss","days","rent","fixed","finance","other"];inputs.forEach(id=>$(id).addEventListener("input",compute));
+let geo=null,poi=null,busy=false,censusBusy=false;const inputs=["radius","areaType","population","purchase","populationSource","purchaseSource","visibility","access","rivals","readiness","passers","conversion","basket","margin","vat","fees","loss","days","rent","fixed","finance","other"];inputs.forEach(id=>$(id).addEventListener("input",compute));
 function status(msg,klass=""){$("lookupStatus").textContent=msg;$("lookupStatus").className="state "+klass}
 function timeoutFetch(url,opts={},ms=16000){const ac=new AbortController;const timeout=setTimeout(()=>ac.abort(),ms);return fetch(url,{...opts,signal:ac.signal}).finally(()=>clearTimeout(timeout))}
 function rad(d){return d*Math.PI/180}
@@ -43,7 +43,7 @@ try{
  const name=[p.name,p.street,p.housenumber,p.postcode,p.city,p.state].filter(Boolean).join(", ");
  const containsStreet=(address.match(/\d/)||[]).length>0&&!p.housenumber;
  if(containsStreet){status("Achtung: Es wurde keine exakte Hausnummer gefunden. Bitte den gefundenen Ort prüfen.","warn")}
- geo={lat,lon,name,uncertain:!!containsStreet};const radius=num("radius");status("Standort gefunden. Einkaufsmöglichkeiten und Umfeld werden recherchiert …");
+ geo={lat,lon,name,uncertain:!!containsStreet};$("census").disabled=!!containsStreet;$("censusStatus").textContent=containsStreet?"Hausnummer unklar. Für Einwohnerabruf zuerst Adresse präzisieren.":"Einwohnerabruf aus Zensus-2022-Raster ist jetzt möglich.";const radius=num("radius");status("Standort gefunden. Einkaufsmöglichkeiten und Umfeld werden recherchiert …");
  const around="(around:"+Math.min(radius,2000)+","+lat+","+lon+")";
  const query='[out:json][timeout:22];(nwr'+around+'["shop"~"^(supermarket|convenience|kiosk|bakery|butcher|greengrocer|general|mall|department_store)$"];nwr'+around+'["amenity"~"^(cafe|fast_food|restaurant|school|college|university)$"];nwr'+around+'["railway"="station"];nwr'+around+'["highway"="bus_stop"];nwr'+around+'["public_transport"="platform"];);out center;';
  let response2;let failure=null;
@@ -68,8 +68,40 @@ try{
  $("geoFacts").hidden=false;status("Umfeldrecherche abgeschlossen. Bitte die Treffer vor Ort prüfen.","ok");
 }catch(e){status((e.name==="AbortError"?"Zeitüberschreitung beim Geodatendienst. Bitte erneut versuchen.":e.message||"Datenabruf fehlgeschlagen.")+" Eine Standortbewertung mit deinen eigenen Angaben bleibt möglich.","err")}finally{busy=false;$("lookup").disabled=false;compute()}}
 $("lookup").addEventListener("click",lookup);
-$("resetGeo").addEventListener("click",()=>{geo=null;poi=null;$("geoFacts").hidden=true;status("Standort zurückgesetzt. Bitte Adresse erneut recherchieren.");compute()});
-$("radius").addEventListener("change",()=>{if(poi){poi=null;geo=null;$("geoFacts").hidden=true;status("Radius geändert. Bitte Umfeld erneut recherchieren.","warn")};compute()});
+$("resetGeo").addEventListener("click",()=>{geo=null;poi=null;$("census").disabled=true;$("censusStatus").textContent="Standort zunächst recherchieren.";$("geoFacts").hidden=true;status("Standort zurückgesetzt. Bitte Adresse erneut recherchieren.");compute()});
+$("radius").addEventListener("change",()=>{if(poi||geo){poi=null;geo=null;$("geoFacts").hidden=true;$("census").disabled=true;$("censusStatus").textContent="Radius geändert. Bitte Standort erneut recherchieren.";status("Radius geändert. Bitte Umfeld erneut recherchieren.","warn")};compute()});
+async function lookupCensus(){
+ if(!geo||geo.uncertain||censusBusy)return;
+ censusBusy=true;$("census").disabled=true;
+ $("censusStatus").textContent="Einwohnerdaten werden beim externen Zensus-Rasterdienst abgefragt …";
+ try{
+  const params=new URLSearchParams({
+   f:"json",where:"1=1",
+   geometry:JSON.stringify({x:geo.lon,y:geo.lat,spatialReference:{wkid:4326}}),
+   geometryType:"esriGeometryPoint",inSR:"4326",
+   spatialRel:"esriSpatialRelIntersects",
+   distance:String(num("radius")),units:"esriSRUnit_Meter",
+   outStatistics:JSON.stringify([{statisticType:"sum",onStatisticField:"Einwohner",outStatisticFieldName:"einwohner_sum"},{statisticType:"count",onStatisticField:"OBJECTID",outStatisticFieldName:"zellen_anzahl"}]),
+   returnGeometry:"false"
+  });
+  const endpoint="https://services2.arcgis.com/jUpNdisbWqRpMo35/ArcGIS/rest/services/Zensus2022_grid_final/FeatureServer/0/query?"+params;
+  const response=await timeoutFetch(endpoint,{},14000);
+  if(!response.ok)throw Error("Datenserver antwortet mit Status "+response.status);
+  const data=await response.json();
+  if(data.error)throw Error("Abfrage vom Datendienst abgewiesen");
+  const values=data.features?.[0]?.attributes||{};
+  const count=Number(values.einwohner_sum),cells=Number(values.zellen_anzahl);
+  if(!Number.isFinite(count)||count<=0||!Number.isFinite(cells)||cells<1)throw Error("Keine belastbare Einwohnerzahl verfügbar");
+  $("population").value=String(Math.round(count));
+  $("populationSource").value="Zensus 2022, 100-m-Raster (externer ArcGIS-Spiegel), Radius "+num("radius")+" m, "+cells+" Zellen";
+  $("censusStatus").textContent=nf.format(count)+" Einwohner in "+nf.format(cells)+" überlappenden Rasterzellen. Näherungswert, da randliche Zellen vollständig gezählt werden. Quelle: Zensus 2022, externer ArcGIS-Spiegel. Keine amtliche Live-API.";
+  $("censusStatus").className="state ok";
+ }catch(err){
+  $("censusStatus").textContent="Automatischer Abruf nicht möglich: "+(err.name==="AbortError"?"Zeitüberschreitung":err.message)+". Bitte Einwohnerzahl aus dem amtlichen Zensus-Atlas manuell nachtragen.";
+  $("censusStatus").className="state warn";
+ }finally{censusBusy=false;$("census").disabled=!geo||!!geo.uncertain;compute()}
+}
+$("census").addEventListener("click",lookupCensus);
 function compute(){
  const messages=[];const population=num("population"),power=num("purchase"),passers=num("passers"),conv=num("conversion"),basket=num("basket"),margin=num("margin"),vat=num("vat"),fees=num("fees"),loss=num("loss"),days=num("days"),rent=num("rent"),fixed=num("fixed"),finance=num("finance"),other=num("other");
  const defined=x=>x!==null&&Number.isFinite(x);let score=0,weights=0;
