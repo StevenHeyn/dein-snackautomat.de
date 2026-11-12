@@ -45,12 +45,28 @@ try{
  if(containsStreet){status("Achtung: Es wurde keine exakte Hausnummer gefunden. Bitte den gefundenen Ort prüfen.","warn")}
  geo={lat,lon,name,uncertain:!!containsStreet};$("census").disabled=!!containsStreet;$("censusStatus").textContent=containsStreet?"Hausnummer unklar. Für Einwohnerabruf zuerst Adresse präzisieren.":"Einwohnerabruf aus Zensus-2022-Raster ist jetzt möglich.";const radius=num("radius");status("Standort gefunden. Einkaufsmöglichkeiten und Umfeld werden recherchiert …");
  const around="(around:"+Math.min(radius,2000)+","+lat+","+lon+")";
- const query='[out:json][timeout:22];(nwr'+around+'["shop"~"^(supermarket|convenience|kiosk|bakery|butcher|greengrocer|general|mall|department_store)$"];nwr'+around+'["amenity"~"^(cafe|fast_food|restaurant|school|college|university)$"];nwr'+around+'["railway"="station"];nwr'+around+'["highway"="bus_stop"];nwr'+around+'["public_transport"="platform"];);out center;';
- let response2;let failure=null;
- for(const endpoint of ["https://overpass.kumi.systems/api/interpreter","https://overpass-api.de/api/interpreter"]){
-  try{response2=await timeoutFetch(endpoint,{method:"POST",body:new URLSearchParams({data:query})},25000);if(response2.ok)break;failure=Error("Geodatenservice antwortet mit Status "+response2.status);response2=null}catch(e){failure=e}
+ const query='[out:json][timeout:18];(nwr'+around+'["shop"~"^(supermarket|convenience|kiosk|bakery|butcher|greengrocer|general|mall|department_store)$"];nwr'+around+'["amenity"~"^(cafe|fast_food|restaurant|school|college|university)$"];nwr'+around+'["railway"="station"];node'+around+'["highway"="bus_stop"];nwr'+around+'["public_transport"="platform"];);out center;';
+ // Die alte kumi.systems-Domain wurde durch overpass.private.coffee abgelöst.
+ // Browser-CORS und Überlastung können je Endpunkt verschieden sein.
+ const endpoints=["https://overpass.private.coffee/api/interpreter","https://overpass-api.de/api/interpreter"];
+ let response2=null,errors=[];
+ for(const endpoint of endpoints){
+  try{
+   const result=await timeoutFetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:new URLSearchParams({data:query}).toString()},19000);
+   if(result.ok){response2=result;break}
+   errors.push(new URL(endpoint).hostname+": HTTP "+result.status);
+  }catch(err){errors.push(new URL(endpoint).hostname+": "+(err.name==="AbortError"?"Zeitüberschreitung":"Netzwerk/CORS"))}
  }
- if(!response2||!response2.ok)throw Error("Kartendienst aktuell nicht erreichbar. Bitte später erneut recherchieren.");
+ if(!response2){
+  // Der Standort selbst bleibt gefunden, auch wenn die externe OSM-Umfeldsuche fehlschlägt.
+  $("matched").textContent="Gefundener Standort: "+name+(geo.uncertain?" · Hausnummer ungeklärt":"");
+  $("supermarkets").textContent="–";$("kiosks").textContent="–";$("bakery").textContent="–";$("frequency").textContent="–";
+  $("osmNote").textContent="Aktuell keine verlässlichen Geschäftsdaten abrufbar. Keine Nullwerte als vermeintlich konkurrenzfreie Lage interpretieren.";
+  $("osmLink").href="https://www.openstreetmap.org/?mlat="+lat+"&mlon="+lon+"#map=16/"+lat+"/"+lon;
+  $("geoFacts").hidden=false;
+  status("Adresse erkannt, aber der Kartendienst ist zurzeit nicht abrufbar. Du kannst die Karte öffnen, Einwohner abrufen und die Bewertung mit eigenen Angaben fortsetzen. Technische Hinweise: "+errors.join("; "),"warn");
+  return;
+ }
  const data2=await response2.json();const els=new Map;
  for(const item of data2.elements||[]){if(!item.tags)continue;const la=item.lat??item.center?.lat,lo=item.lon??item.center?.lon;if(typeof la!=="number"||typeof lo!=="number")continue;const km=dist(lat,lon,la,lo);if(km>radius/1000)continue;els.set(item.type+"-"+item.id,{tags:item.tags,km})}
  const arr=[...els.values()],shop=tag=>arr.filter(x=>x.tags.shop===tag);
