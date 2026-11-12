@@ -1,0 +1,13 @@
+{
+  "site": "dein-snackautomat.de",
+  "release": "seo-performance-and-lead-routing-2026-11-12",
+  "filesExpected": [
+    "index.html",
+    "kontakt.html",
+    "shop.html",
+    "snackautomat-outdoor.html",
+    "snackautomaten-hamburg.html",
+    "assets/dein-snackautomat-logo-neu.svg"
+  ],
+  "hostingNote": "This marker is generated from the connected GitHub repository. If this file is not publicly served, the current hosting publication is not serving this repository version."
+}
