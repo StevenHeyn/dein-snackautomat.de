@@ -87,7 +87,7 @@ if(knownSources[source]&&source==="startseite"&&details.length){
 if(requestedLocationReport){
  const report=requestedLocationReport.slice(0,2500);
  const messageField=form.elements.namedItem("nachricht");
- messageField.value="Standortanalyse für einen 24/7-Automatenkiosk:\\n"+report+"\\n\\nIch möchte meine Standortplanung unverbindlich besprechen.";
+ messageField.value="Standortanalyse für einen 24/7-Automatenkiosk:\n"+report+"\n\nIch möchte meine Standortplanung unverbindlich besprechen.";
  form.elements.namedItem("subject").value="B2B-Anfrage: 24/7-Kiosk Standortcheck";
  const topicField=form.elements.namedItem("thema");topicField.value="Sonstige Anfrage";
 }
