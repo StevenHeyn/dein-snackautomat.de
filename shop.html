@@ -96,7 +96,8 @@ const models=spareModelNames();
 $("accessory-nav").hidden=true;
 $("spare-tools").hidden=spareManufacturer===null;
 $("spare-count").hidden=spareManufacturer===null;
-$("spare-search").hidden=spareMachine===null;
+$("spare-search").hidden=spareManufacturer===null||(spareMachine===null&&spareManufacturer!=="SandenVendo");
+$("spare-search").placeholder=spareManufacturer==="SandenVendo"&&spareMachine===null?"Artikelnummer oder Bezeichnung im gesamten SandenVendo-Katalog suchen …":"Teilenummer oder Bezeichnung suchen …";
 $("items").classList.toggle("spare-brand-select",spareManufacturer===null);
 if(spareManufacturer===null){
  $("section-title").textContent="Ersatzteile – Hersteller auswählen";
@@ -111,6 +112,28 @@ if(spareManufacturer===null){
 }
 if(spareMachine===null){
  $("section-title").textContent=spareManufacturer+" – Automatenmodell auswählen";
+ const globalTerm=spareManufacturer==="SandenVendo"?$("spare-search").value.trim().toLocaleLowerCase("de"):"";
+ if(globalTerm.length>=2){
+  const sourceName="SandenVendo – Ersatzteil-Gesamtkatalog";
+  const sourceGroups=spareMachines[sourceName]||[];
+  const matches=[];
+  for(const group of sourceGroups){
+   for(const part of group.items){
+    if(String(part.code).toLocaleLowerCase("de").includes(globalTerm)||String(part.name).toLocaleLowerCase("de").includes(globalTerm))
+     matches.push({part,group});
+   }
+  }
+  const machineKey=sourceName.replace(/[^a-z0-9]/gi,"").toLowerCase();
+  $("spare-count").textContent=matches.length+" Treffer im gesamten SandenVendo-Katalog (3.158 Artikel) · Modellpassung prüfen";
+  $("items").innerHTML=matches.slice(0,100).map(({part,group})=>{
+   const priced=typeof part.price==="number"&&Number.isFinite(part.price)&&part.price>=0;
+   const id="et-"+machineKey+"-"+group.number+"-"+part.pos+"-"+part.code;
+   const inquiry="kontakt.html?thema=Zubehör&quelle=ersatzteile&produkt="+encodeURIComponent("SandenVendo Ersatzteil Nr. "+part.code+" "+part.name);
+   return '<article class="item"><div class="image"><span class="placeholder">VENDO</span></div><small>'+esc(group.name)+'</small><h3>'+esc(part.name)+'</h3><div class="part-meta">Artikel-Nr. '+esc(part.code)+'</div><p>Kompatibilität mit Automatenmodell und Seriennummer vor Bestellung prüfen.</p><div class="price">'+(priced?eur(part.price)+" netto":"Preis auf Anfrage")+'</div><div class="actions">'+(priced?'<button type="button" class="btn" data-add="'+esc(id)+'">In den Warenkorb</button>':'<a class="btn" href="'+esc(inquiry)+'">Artikel anfragen</a>')+'</div></article>';
+  }).join("")+(matches.length>100?'<p class="muted">Die ersten 100 Treffer werden angezeigt. Bitte Suche präzisieren.</p>':matches.length===0?'<p class="muted">Keine Artikel gefunden. Bitte Artikelnummer oder Bezeichnung prüfen.</p>':"");
+  return;
+ }
+
  $("spare-count").textContent=models.length?models.length+" Ersatzteilverzeichnisse verfügbar":"Noch keine Ersatzteilkataloge für diesen Hersteller hinterlegt.";
  $("items").innerHTML=(spareManufacturer==="SandenVendo"?'<p style="grid-column:1/-1;color:#ead1b9;font-size:14px">Wähle deinen Automaten. <strong>Modellnennung</strong> bedeutet, dass das Modell im Artikelnamen steht; <strong>Baureihentreffer</strong> müssen anhand der Artikel- und Seriennummer geprüft werden. Alle übrigen Teile bleiben über den Gesamtkatalog auffindbar.</p>':"")+models.map((name,i)=>'<button class="item category-tile" data-spare-machine="'+i+'" type="button"><div class="image"><span class="placeholder">'+(spareManufacturer==="Necta"?"NECTA":"VENDO")+'</span></div><small>'+esc(spareManufacturer)+' · Ersatzteilkatalog</small><h3>'+esc(name)+'</h3><p>'+spareMachines[name].length+' Baugruppen · '+spareMachines[name].reduce((n,g)=>n+g.items.length,0)+' Ersatzteilpositionen</p><span class="outline">Ersatzteile ansehen</span></button>').join("") || '<article class="item"><h3>SandenVendo-Ersatzteile anfragen</h3><p>Aktuell sind noch keine SandenVendo-Ersatzteilkataloge hinterlegt. Bitte Automatenmodell und Artikelnummer angeben.</p><a class="btn" href="kontakt.html?thema=Zubeh%C3%B6r&amp;produkt=SandenVendo%20Ersatzteile">Ersatzteil anfragen</a></article>';
  return;
