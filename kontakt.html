@@ -24,6 +24,7 @@ const requestedProduct=query.get("produkt");
 const requestedTopic=query.get("thema");
 const requestedCart=query.get("warenkorb");
 const requestedLocationReport=query.get("standortcheck");
+const requestedAdvice=query.get("beratung");
 // Nur die Seitenkategorie, keine persönlichen URL-Parameter oder Besucherkennung, übermitteln.
 const knownSources={
  "outdoor":"Landingpage Snackautomat Outdoor",
@@ -33,7 +34,9 @@ const knownSources={
  "ersatzteile":"Ersatzteilshop",
  "produkte":"Produktdetailseite",
  "smart":"Hanse Vend Smart",
- "region":"Regionale Landingpage"
+ "region":"Regionale Landingpage",
+ "versorgung":"Mitarbeiter- und Besucherversorgung",
+ "berater":"Geführter Automatenberater"
 };
 const source=(query.get("quelle")||"").toLowerCase().slice(0,40);
 let leadOrigin=knownSources[source]||"Kontaktseite direkt";
@@ -88,7 +91,7 @@ if(allowedPlacement.includes(placement))details.push("Aufstellort: "+placement);
 if(allowedTiming.includes(timing))details.push("Gewünschter Zeitraum: "+timing);
 if(details.length){
  const messageField=form.elements.namedItem("nachricht");
- const prefix="Meine Vorauswahl:\\n"+details.join("\\n")+"\\n\\n";
+ const prefix="Meine Vorauswahl:\n"+details.join("\n")+"\n\n";
  messageField.value=prefix+messageField.value;
  if(!requestedProduct&&!requestedCart&&!messageField.value.includes("Bitte senden")){
   messageField.value+="Ich freue mich über eine passende Empfehlung und ein unverbindliches Angebot.";
@@ -96,6 +99,11 @@ if(details.length){
 }
 if(knownSources[source]&&source==="startseite"&&details.length){
  form.elements.namedItem("subject").value="Neue Automatenanfrage über Startseiten-Konfigurator";
+}
+if(requestedAdvice){
+ const advice=requestedAdvice.slice(0,1700);
+ form.elements.namedItem("nachricht").value=advice+"\n\nBitte empfehlen Sie mir ein geeignetes Modell und senden Sie mir ein unverbindliches B2B-Angebot.";
+ form.elements.namedItem("subject").value="B2B-Automatenberatung – vorausgewählter Bedarf";
 }
 if(requestedLocationReport){
  const report=requestedLocationReport.slice(0,2500);
