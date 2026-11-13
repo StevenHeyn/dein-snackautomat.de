@@ -8,7 +8,7 @@
 <div class="buttons"><button class="btn" id="lookup" type="button">Umfeld recherchieren</button><button class="btn secondary" id="resetGeo" type="button">Standort zurücksetzen</button></div>
 <div id="lookupStatus" role="status" aria-live="polite" class="state">Noch keine Standortdaten abgerufen.</div>
 <div id="geoFacts" hidden><p id="matched" class="tip"></p><div class="statGrid"><div class="stat"><b id="supermarkets">–</b><small>Supermärkte/Discounter</small></div><div class="stat"><b id="kiosks">–</b><small>Kioske / Convenience</small></div><div class="stat"><b id="bakery">–</b><small>Bäckereien / Lebensmittel</small></div><div class="stat"><b id="frequency">–</b><small>ÖPNV / Schulen / Gastro</small></div></div><p class="notes" id="osmNote"></p><div class="sourceLinks"><a id="osmLink" href="#" target="_blank" rel="noopener noreferrer">Umfeld in OpenStreetMap ansehen</a></div></div>
-<p class="notes">Quellen: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap-Mitwirkende</a>, Suchdienst Photon (komoot) und Overpass. Abdeckung und Aktualität von Einträgen schwanken; fehlende Geschäfte sind kein Nachweis, dass dort keine existieren. Die öffentlichen Schnittstellen sind ein Pilotbetrieb ohne garantierte Verfügbarkeit.</p>
+<p class="notes">Wichtig: Ein ausbleibender Kartendienst ist kein Nachweis für fehlenden Wettbewerb. Der Bericht bewertet dann nur die vorhandenen Kriterien und zeigt eine reduzierte Datenabdeckung. Für zuverlässig abrufbare Geschäftsdaten im kommerziellen Betrieb wird ein eigener Geodaten-Cache oder ein vertraglich abgesicherter Dienst benötigt.</p><p class="notes">Quellen: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap-Mitwirkende</a>, Suchdienst Photon (komoot) und Overpass. Abdeckung und Aktualität von Einträgen schwanken; fehlende Geschäfte sind kein Nachweis, dass dort keine existieren. Die öffentlichen Schnittstellen sind ein Pilotbetrieb ohne garantierte Verfügbarkeit.</p>
 </section>
 <section class="card"><h2>2. Nachfrage & Kaufkraft</h2><p class="muted">Bevölkerungs- und Kaufkraftdaten sind nicht automatisch verfügbar. Bitte aus einer belastbaren Quelle übernehmen oder leer lassen. Wir zeigen keine erfundenen Regionalwerte.</p>
 <div class="two"><label class="field">Einwohner im gewählten Einzugsgebiet<input id="population" type="number" min="0" step="100" placeholder="z. B. 6500"><small>Aus Zensus-Rasterdaten / belastbarer Auswertung.</small></label><label class="field">Kaufkraftindex (Deutschland = 100)<input id="purchase" type="number" min="40" max="220" step="1" placeholder="z. B. 104"><small>Regional-/PLZ-Wert inkl. Quellenjahr.</small></label></div>
@@ -48,11 +48,17 @@ try{
  const query='[out:json][timeout:18];(nwr'+around+'["shop"~"^(supermarket|convenience|kiosk|bakery|butcher|greengrocer|general|mall|department_store)$"];nwr'+around+'["amenity"~"^(cafe|fast_food|restaurant|school|college|university)$"];nwr'+around+'["railway"="station"];node'+around+'["highway"="bus_stop"];nwr'+around+'["public_transport"="platform"];);out center;';
  // Die alte kumi.systems-Domain wurde durch overpass.private.coffee abgelöst.
  // Browser-CORS und Überlastung können je Endpunkt verschieden sein.
- const endpoints=["https://overpass.private.coffee/api/interpreter","https://overpass-api.de/api/interpreter"];
+ const endpoints=["https://overpass.private.coffee/api/interpreter","https://overpass-api.de/api/interpreter","https://overpass.nchc.org.tw/api/interpreter"];
  let response2=null,errors=[];
  for(const endpoint of endpoints){
   try{
-   const result=await timeoutFetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},body:new URLSearchParams({data:query}).toString()},19000);
+   // Öffentliche OSM-Instanzen haben unterschiedliche POST/CORS-Regeln. Erst kurze GET-Abfrage, dann POST-Fallback.
+   let result;
+   try{result=await timeoutFetch(endpoint+"?data="+encodeURIComponent(query),{},12500)}
+   catch(e){result=await timeoutFetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({data:query}).toString()},12500)}
+   if(!result.ok&&[400,403,405,414].includes(result.status)){
+    result=await timeoutFetch(endpoint,{method:"POST",headers:{"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({data:query}).toString()},12500);
+   }
    if(result.ok){response2=result;break}
    errors.push(new URL(endpoint).hostname+": HTTP "+result.status);
   }catch(err){errors.push(new URL(endpoint).hostname+": "+(err.name==="AbortError"?"Zeitüberschreitung":"Netzwerk/CORS"))}
@@ -64,7 +70,7 @@ try{
   $("osmNote").textContent="Aktuell keine verlässlichen Geschäftsdaten abrufbar. Keine Nullwerte als vermeintlich konkurrenzfreie Lage interpretieren.";
   $("osmLink").href="https://www.openstreetmap.org/?mlat="+lat+"&mlon="+lon+"#map=16/"+lat+"/"+lon;
   $("geoFacts").hidden=false;
-  status("Adresse erkannt, aber der Kartendienst ist zurzeit nicht abrufbar. Du kannst die Karte öffnen, Einwohner abrufen und die Bewertung mit eigenen Angaben fortsetzen. Technische Hinweise: "+errors.join("; "),"warn");
+  status("Adresse erkannt, aber freie Kartenserver antworten aktuell nicht. Standort, OpenStreetMap-Karte und Einwohnerabfrage bleiben verfügbar; manuelle Eingaben funktionieren. Details: "+errors.join("; "),"warn");
   return;
  }
  const data2=await response2.json();const els=new Map;
