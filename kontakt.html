@@ -61,11 +61,11 @@ if(requestedTopic){
 const cityRaw=query.get("stadt")||"";
 const legacyRegion=requestedTopic&&requestedTopic.startsWith("Snackautomat Beratung ")?requestedTopic.slice("Snackautomat Beratung ".length):requestedTopic==="Snackautomat deutschlandweit"?"deutschlandweit":"";
 const region=cityRaw||legacyRegion;
-if(region&&region.length<=80&&/^[\\p{L}\\p{M}0-9 .\\-]+$/u.test(region)){
+if(region&&region.length<=80&&/^[\p{L}\p{M}0-9 .-]+$/u.test(region)){
  const regionText=region==="deutschlandweit"?"deutschlandweit":"für "+region;
  form.elements.namedItem("thema").value="Snackautomat";
  const messageField=form.elements.namedItem("nachricht");
- messageField.value="Ich interessiere mich für einen Snackautomaten "+regionText+".\\n\\nBitte senden Sie mir eine individuelle, unverbindliche Beratung und ein Angebot.\\n\\nGeplanter Standort und Einsatzzweck: ";
+ messageField.value="Ich interessiere mich für einen Snackautomaten "+regionText+".\n\nBitte senden Sie mir eine individuelle, unverbindliche Beratung und ein Angebot.\n\nGeplanter Standort und Einsatzzweck: ";
  form.elements.namedItem("subject").value="Regionale Snackautomaten-Anfrage: "+region;
  form.elements.namedItem("anfrage_herkunft").value="Regionale Landingpage: "+region;
 }
