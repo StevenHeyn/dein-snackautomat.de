@@ -32,7 +32,8 @@ const knownSources={
  "kiosk":"24/7-Kioskplanung",
  "ersatzteile":"Ersatzteilshop",
  "produkte":"Produktdetailseite",
- "smart":"Hanse Vend Smart"
+ "smart":"Hanse Vend Smart",
+ "region":"Regionale Landingpage"
 };
 const source=(query.get("quelle")||"").toLowerCase().slice(0,40);
 let leadOrigin=knownSources[source]||"Kontaktseite direkt";
@@ -55,6 +56,18 @@ form.elements.namedItem("anfrage_herkunft").value=leadOrigin;
 if(requestedTopic){
   const topicField=form.elements.namedItem("thema");
   if([...topicField.options].some(option=>option.value===requestedTopic))topicField.value=requestedTopic;
+}
+// Regionale Angebotsanfragen mit gültigem Formular-Thema und Städtenachweis.
+const cityRaw=query.get("stadt")||"";
+const legacyRegion=requestedTopic&&requestedTopic.startsWith("Snackautomat Beratung ")?requestedTopic.slice("Snackautomat Beratung ".length):requestedTopic==="Snackautomat deutschlandweit"?"deutschlandweit":"";
+const region=cityRaw||legacyRegion;
+if(region&&region.length<=80&&/^[\\p{L}\\p{M}0-9 .\\-]+$/u.test(region)){
+ const regionText=region==="deutschlandweit"?"deutschlandweit":"für "+region;
+ form.elements.namedItem("thema").value="Snackautomat";
+ const messageField=form.elements.namedItem("nachricht");
+ messageField.value="Ich interessiere mich für einen Snackautomaten "+regionText+".\\n\\nBitte senden Sie mir eine individuelle, unverbindliche Beratung und ein Angebot.\\n\\nGeplanter Standort und Einsatzzweck: ";
+ form.elements.namedItem("subject").value="Regionale Snackautomaten-Anfrage: "+region;
+ form.elements.namedItem("anfrage_herkunft").value="Regionale Landingpage: "+region;
 }
 if(requestedProduct){
   const messageField=form.elements.namedItem("nachricht");
