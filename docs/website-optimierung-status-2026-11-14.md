@@ -92,3 +92,10 @@ Google untersagt Doorway-Seiten mit nur geringfügig geänderten Städtenamen. B
 - Bei GitHub Pages meldet die Umgebung `https://dein-snackautomat.de/`; direkte externe Browser-/DNS-Erreichbarkeit und E-Mail-Empfang sind in dieser Laufzeit nicht nachprüfbar. Ein erfolgreiches Build ist kein Browser-End-to-End-Test.
 - Web3Forms: Die an den Schlüssel gebundene Empfängeradresse kann nur im bestehenden Web3Forms-Konto oder durch einen kontrollierten Versand mit Mailbox-Prüfung bestätigt werden. Nicht allein aus dem sichtbaren `mailto:`-Link schließen.
 - Vor endgültiger fachlicher Freigabe: Mobile-Screenshots/Touch-Tests, vollständige Gerätemaße im separaten 3D-Planer, Konfigurations-Export, Karten-/Zensus-Live-Abfragen, Kundenfreigaben und tatsächliche DNS/IONOS-Routen prüfen.
+
+
+## Finaler Abnahmeschritt und Formular-Testprotokoll (14.11.2026)
+- Die verbindliche **Go/No-Go-Abnahme** mit fünf Prüfbereichen und ein konkreter, datensparsamer Web3Forms-Zustelltest sind dokumentiert: [Formular-Test und Abnahme](formular-abnahme-2026-11-14.md).
+- **Vorbereitet und im Repository gespeichert:** Testkennung, Eingaben, API- und Mailbox-Nachweis, Fehlerfall, Anfrageparameter und Freigabegrenzen.
+- **Nicht durchgeführt oder nicht bestätigt:** Web3Forms-Empfängerzuordnung, realer Testversand und Posteingang bei `info@dein-snackautomat.de`. Für diese Nachweise ist Zugriff auf den zugehörigen Web3Forms-Account und/oder das Empfängerpostfach erforderlich.
+- **Aktuelle fachliche Entscheidung: NO-GO für die uneingeschränkte Endabnahme** bis alle fünf erforderlichen Testgruppen nachweislich erfüllt sind. Das bereits erfolgreiche Deployment wird dadurch nicht zurückgenommen.
