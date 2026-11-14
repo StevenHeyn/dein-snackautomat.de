@@ -1,0 +1,49 @@
+name: Öffentliche Website prüfen
+on:
+  push:
+    paths:
+      - '.github/workflows/public-site-check.yml'
+      - 'site-version.json'
+  workflow_dispatch:
+jobs:
+  pruefe-domain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Öffentliche Domain und Versionskennung prüfen
+        shell: bash
+        run: |
+          set -euo pipefail
+          marker='platform-conversion-quality-2026-11-14'
+          address='https://dein-snackautomat.de/site-version.json'
+          echo "Prüfe $address auf Release $marker"
+          ok=0
+          for attempt in $(seq 1 18); do
+            if curl --fail --location --silent --show-error --connect-timeout 10 --max-time 22 -H 'Cache-Control: no-cache' "$address?run=$GITHUB_RUN_ID-$attempt" -o /tmp/dein-snackautomat-release.json; then
+              if grep -Fq "\"release\": \"$marker\"" /tmp/dein-snackautomat-release.json; then
+                echo "PASS: Die öffentliche Domain liefert die neue Release-Kennung."
+                ok=1
+                break
+              else
+                echo "Versuch $attempt: Adresse erreichbar, aber bisherige oder fremde Release-Kennung."
+              fi
+            else
+              echo "Versuch $attempt: Die Domain ist nicht erreichbar oder antwortet mit einem HTTP-Fehler."
+            fi
+            sleep 10
+          done
+          if [ "$ok" -ne 1 ]; then
+            echo "FAIL: Öffentliche Website liefert die erwartete Version nicht. Domain-/IONOS-/GitHub-Pages-Zuordnung prüfen."
+            exit 1
+          fi
+          for page in 'automatenloesungen.html' 'automatenberater.html' 'automaten-wirtschaftlichkeit.html' 'snackautomat-outdoor.html'; do
+            if curl --fail --location --silent --show-error --connect-timeout 10 --max-time 22 "https://dein-snackautomat.de/$page?run=$GITHUB_RUN_ID" -o /tmp/page.html; then
+              if grep -qi '<h1' /tmp/page.html; then echo "PASS: /$page liefert HTML mit H1"; else echo "FAIL: /$page ohne H1"; exit 1; fi
+            else echo "FAIL: /$page nicht öffentlich erreichbar"; exit 1; fi
+          done
+          echo "Öffentliche Website-Prüfung vollständig erfolgreich."
+      - name: WWW-Veröffentlichung separat dokumentieren
+        if: always()
+        shell: bash
+        run: |
+          echo 'WWW-Host separat (kein Abbruch bei anderem Routing):'
+          curl --location --silent --show-error --output /dev/null --write-out 'HTTP %{http_code}, final %{url_effective}\n' --connect-timeout 10 --max-time 20 'https://www.dein-snackautomat.de/' || true
