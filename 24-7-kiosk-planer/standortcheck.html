@@ -8,6 +8,8 @@
 <div class="buttons"><button class="btn" id="lookup" type="button">Umfeld recherchieren</button><button class="btn secondary" id="resetGeo" type="button">Standort zurücksetzen</button></div>
 <div id="lookupStatus" role="status" aria-live="polite" class="state">Noch keine Standortdaten abgerufen.</div>
 <div id="geoFacts" hidden><p id="matched" class="tip"></p><div class="statGrid"><div class="stat"><b id="supermarkets">–</b><small>Supermärkte/Discounter</small></div><div class="stat"><b id="kiosks">–</b><small>Kioske / Convenience</small></div><div class="stat"><b id="bakery">–</b><small>Bäckereien / Lebensmittel</small></div><div class="stat"><b id="frequency">–</b><small>ÖPNV / Schulen / Gastro</small></div></div><p class="notes" id="osmNote"></p><div class="sourceLinks"><a id="osmLink" href="#" target="_blank" rel="noopener noreferrer">Umfeld in OpenStreetMap ansehen</a></div></div>
+<div style="margin-top:16px;padding:14px;background:#f4f7f8;border:1px solid #d5e0e6;border-radius:10px"><h3>Manuelle Umgebungserhebung (bei Dienstausfall)</h3><p class="notes">Nur tatsächlich selbst recherchierte Zahlen innerhalb des gewählten Radius eintragen. Leere Felder bleiben unbekannt, die Zahl Null bedeutet ausdrücklich „keine Einträge beobachtet“. Automatische OSM-Werte haben Vorrang, wenn verfügbar.</p>
+<div class="two"><label class="field">Supermärkte / größere Nahversorger<input id="manualSupermarkets" type="number" min="0" max="1000" step="1" placeholder="Nicht erhoben"></label><label class="field">Kioske / kleine Convenience-Angebote<input id="manualKiosks" type="number" min="0" max="1000" step="1" placeholder="Nicht erhoben"></label></div><div class="two"><label class="field">ÖPNV-Haltestellen / relevante Einrichtungen<input id="manualFrequency" type="number" min="0" max="1000" step="1" placeholder="Nicht erhoben"></label><label class="field">Quelle & Datum der eigenen Recherche<input id="manualSource" type="text" maxlength="140" placeholder="z. B. Ortsbegehung 14.11.2026"></label></div></div>
 <p class="notes">Wichtig: Ein ausbleibender Kartendienst ist kein Nachweis für fehlenden Wettbewerb. Der Bericht bewertet dann nur die vorhandenen Kriterien und zeigt eine reduzierte Datenabdeckung. Für zuverlässig abrufbare Geschäftsdaten im kommerziellen Betrieb wird ein eigener Geodaten-Cache oder ein vertraglich abgesicherter Dienst benötigt.</p><p class="notes">Quellen: <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">© OpenStreetMap-Mitwirkende</a>, Suchdienst Photon (komoot) und Overpass. Abdeckung und Aktualität von Einträgen schwanken; fehlende Geschäfte sind kein Nachweis, dass dort keine existieren. Die öffentlichen Schnittstellen sind ein Pilotbetrieb ohne garantierte Verfügbarkeit.</p>
 </section>
 <section class="card"><h2>2. Nachfrage & Kaufkraft</h2><p class="muted">Bevölkerungs- und Kaufkraftdaten sind nicht automatisch verfügbar. Bitte aus einer belastbaren Quelle übernehmen oder leer lassen. Wir zeigen keine erfundenen Regionalwerte.</p>
@@ -32,7 +34,7 @@
 (function(){
 "use strict";
 const $=id=>document.getElementById(id),num=id=>{let v=$(id).value;return v===""?null:Number(v)},nf=new Intl.NumberFormat("de-DE",{maximumFractionDigits:0}),money=n=>new Intl.NumberFormat("de-DE",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
-let geo=null,poi=null,busy=false,censusBusy=false;const inputs=["radius","areaType","population","purchase","populationSource","purchaseSource","visibility","access","rivals","readiness","passers","conversion","basket","margin","vat","fees","loss","days","rent","fixed","finance","other"];inputs.forEach(id=>$(id).addEventListener("input",compute));
+let geo=null,poi=null,busy=false,censusBusy=false;const inputs=["radius","areaType","manualSupermarkets","manualKiosks","manualFrequency","manualSource","population","purchase","populationSource","purchaseSource","visibility","access","rivals","readiness","passers","conversion","basket","margin","vat","fees","loss","days","rent","fixed","finance","other"];inputs.forEach(id=>$(id).addEventListener("input",compute));
 function status(msg,klass=""){$("lookupStatus").textContent=msg;$("lookupStatus").className="state "+klass}
 function timeoutFetch(url,opts={},ms=16000){const ac=new AbortController;const timeout=setTimeout(()=>ac.abort(),ms);return fetch(url,{...opts,signal:ac.signal}).finally(()=>clearTimeout(timeout))}
 function rad(d){return d*Math.PI/180}
@@ -128,7 +130,20 @@ function compute(){
  const messages=[];const population=num("population"),power=num("purchase"),passers=num("passers"),conv=num("conversion"),basket=num("basket"),margin=num("margin"),vat=num("vat"),fees=num("fees"),loss=num("loss"),days=num("days"),rent=num("rent"),fixed=num("fixed"),finance=num("finance"),other=num("other");
  const defined=x=>x!==null&&Number.isFinite(x);let score=0,weights=0;
  function add(value,weight){score+=Math.max(0,Math.min(100,value))*weight;weights+=weight}
- if(poi){const c=poi.large.length+poi.small.length;const f=poi.transport.length+poi.school.length+poi.gastro.length;add(c===0?57:c<=2?72:c<=6?58:35,22);add(f===0?35:f<=3?55:f<=10?70:82,16);messages.push({text:poi.large.length+" größere Einkaufsmöglichkeiten und "+poi.small.length+" Kioske/Convenience-Angebote im erfassten Umkreis. Diese können sowohl Konkurrenz als auch Frequenzbringer sein."});if(f===0)messages.push({text:"Im Kartendatensatz kaum Frequenzbringer erkannt; die tatsächlichen Laufwege vor Ort zählen.",type:"critical"})}
+ const manualCounts=["manualSupermarkets","manualKiosks","manualFrequency"].map(num);
+ const manualValid=!poi&&manualCounts.every(x=>defined(x)&&x>=0&&Number.isInteger(x)&&x<=1000)&&$("manualSource").value.trim().length>=6;
+ if(poi){
+  const c=poi.large.length+poi.small.length,f=poi.transport.length+poi.school.length+poi.gastro.length;
+  add(c===0?57:c<=2?72:c<=6?58:35,22);
+  add(f===0?35:f<=3?55:f<=10?70:82,16);
+  messages.push({text:poi.large.length+" größere Einkaufsangebote, "+poi.small.length+" Kioske sowie "+f+" potenzielle Frequenzbringer laut OSM-Einträgen (keine Passantenmessung)."});
+ }else if(manualValid){
+  const c=manualCounts[0]+manualCounts[1],f=manualCounts[2];
+  add(c===0?57:c<=2?72:c<=6?58:35,22);
+  add(f===0?35:f<=3?55:f<=10?70:82,16);
+  messages.push({text:"Manuell erhobene Umgebung: "+manualCounts[0]+" größere Nahversorger, "+manualCounts[1]+" Kioske und "+f+" Einrichtungen. Quelle: "+$("manualSource").value.trim()+". Ungeprüfte Nutzerangaben.",type:"critical"});
+ }else messages.push({text:"Keine vollständige Umfeldrecherche. OSM-Daten fehlen; für den Wettbewerbs-/Frequenzteil sind alle drei manuellen Zahlen plus Erhebungsquelle erforderlich.",type:"critical"});
+
  if(defined(population)){const density=population/(Math.PI*(num("radius")/1000)**2);add(density<500?27:density<1500?49:density<3500?70:85,20);messages.push({text:"Einwohnerzahl: "+nf.format(population)+" im gewählten Radius (vom Nutzer angegeben)."});}
  else messages.push({text:"Einwohnerpotenzial fehlt. Bitte aus amtlichen Zensus-Rasterdaten übernehmen; die Bewertung bleibt eingeschränkt.",type:"critical"});
  if(defined(power)){add(Math.min(100,Math.max(10,50+(power-100)*1.1)),13);messages.push({text:"Kaufkraftindex "+power+" (vom Nutzer angegeben, nicht automatisch verifiziert)."});}
@@ -146,7 +161,7 @@ function compute(){
  if(readiness===-1)verdict="Aktuell nicht umsetzbar";
  $("rating").textContent=verdict;
  $("ratingInfo").textContent=weights<55?"Für eine belastbarere Aussage fehlen wichtige Standortdaten.":"Heuristischer Screening-Wert, kein empirisch validierter Erfolgsindikator.";
- $("confidence").textContent="Datenabdeckung der bewerteten Kriterien: "+completeness+" % · Umfelddaten "+(poi?"OSM-Recherche":"noch nicht recherchiert")+" · Einwohner und Kaufkraft "+(defined(population)&&defined(power)?"vom Kunden eingegeben":"unvollständig");
+ $("confidence").textContent="Datenabdeckung der bewerteten Kriterien: "+completeness+" % · Umfelddaten "+(poi?"OSM-Recherche":manualValid?"eigene nicht verifizierte Erhebung":"nicht verfügbar")+" · Einwohner und Kaufkraft "+(defined(population)&&defined(power)?"vom Kunden eingegeben":"unvollständig");
  $("insights").innerHTML=messages.map(x=>'<div class="insight '+(x.type==="critical"?"critical":"")+'">'+escapeHTML(x.text)+'</div>').join("");
  const expenses=[rent,fixed,finance,other];
  const costs=expenses.every(defined)?expenses.reduce((a,b)=>a+b,0):null;
