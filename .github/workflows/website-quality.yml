@@ -1,0 +1,16 @@
+name: Website-Qualität
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  statische-pruefung:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prüfe HTML-Links, JavaScript, Sitemap und Formular
+        run: node scripts/check-site.mjs
