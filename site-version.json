@@ -1,13 +1,19 @@
 {
   "site": "dein-snackautomat.de",
-  "release": "seo-performance-and-lead-routing-2026-11-12",
+  "release": "platform-conversion-quality-2026-11-14",
   "filesExpected": [
     "index.html",
+    "automatenloesungen.html",
+    "automatenberater.html",
+    "automaten-wirtschaftlichkeit.html",
     "kontakt.html",
+    "produkt.html",
     "shop.html",
     "snackautomat-outdoor.html",
-    "snackautomaten-hamburg.html",
-    "assets/dein-snackautomat-logo-neu.svg"
+    "24-7-kiosk-planer/standortcheck.html",
+    "sitemap.xml",
+    "scripts/check-site.mjs"
   ],
-  "hostingNote": "This marker is generated from the connected GitHub repository. If this file is not publicly served, the current hosting publication is not serving this repository version."
+  "publishing": "GitHub Pages custom-domain deployment has been reported successful; verify DNS/IONOS routing independently",
+  "contact": "info@dein-snackautomat.de"
 }
