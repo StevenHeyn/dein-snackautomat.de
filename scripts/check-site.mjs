@@ -19,7 +19,7 @@ function err(file,detail){errors.push(file+": "+detail)}
 function normalize(file,reference){
  let url=reference.replaceAll("&amp;","&").trim();
  if(!url||/^(?:https?:|mailto:|tel:|data:|blob:|javascript:|#|\/\/)/i.test(url))return null;
- if(/[{}]/.test(url))return null;
+ if(/[{}]/.test(url)||/['"+]/.test(url)||/\b(?:encodeURI|esc)\(/.test(url))return null;
  url=url.split(/[?#]/)[0];
  try{url=decodeURIComponent(url)}catch{}
  const directory=url.startsWith("/")?"":path.posix.dirname(file);
