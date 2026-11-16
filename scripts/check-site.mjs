@@ -55,6 +55,11 @@ for(const u of sitemapUrls){
   let rel=url.pathname.slice(1)||"index.html";
   if(rel.endsWith("/"))rel+="index.html";
   if(!paths.has(rel))err("sitemap.xml","missing target "+rel);
+  else if(rel.endsWith(".html")){
+    const page=fs.readFileSync(rel,"utf8");
+    if(/<meta\s+[^>]*name=["\x27]robots["\x27][^>]*content=["\x27][^"\x27]*noindex/i.test(page))
+      err("sitemap.xml","non-indexable noindex page listed: "+rel);
+  }
  }catch{err("sitemap.xml","invalid URL "+u)}
 }
 // Security regression checks: prevent accidental publication of server secrets.
