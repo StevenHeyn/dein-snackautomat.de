@@ -124,19 +124,25 @@ form.addEventListener("submit",async function(event){
   statusEl.textContent="Deine Anfrage wird übermittelt.";
   try{
     const data=new FormData(form);
-    const response=await fetch("https://api.web3forms.com/submit",{
-      method:"POST",
-      body:data,
-      headers:{Accept:"application/json"}
-    });
+    const controller=new AbortController();
+    const timeout=setTimeout(()=>controller.abort(),15000);
+    let response;
+    try{
+      response=await fetch("https://api.web3forms.com/submit",{
+        method:"POST",
+        body:data,
+        headers:{Accept:"application/json"},
+        signal:controller.signal
+      });
+    }finally{clearTimeout(timeout)}
     const result=await response.json();
     if(!response.ok||result.success!==true)throw new Error("Versand nicht bestätigt");
     statusEl.style.color="#7cdb96";
-    statusEl.textContent="Vielen Dank! Deine Anfrage wurde erfolgreich übermittelt. Wir melden uns bei dir.";
+    statusEl.textContent="Vielen Dank! Der Formularanbieter hat deine Anfrage angenommen. Bitte bewahre die Angaben bei wichtigen Anliegen auf. Wir melden uns nach Eingang der Nachricht.";
     form.reset();
   }catch(error){
     statusEl.style.color="#ffb3a7";
-    statusEl.textContent="Die Anfrage konnte leider nicht gesendet werden. Bitte versuche es erneut oder schreibe an info@dein-snackautomat.de.";
+    statusEl.textContent=error.name==="AbortError"?"Der Formularanbieter antwortet derzeit nicht. Ob deine Nachricht angekommen ist, ist unklar. Bitte nicht mehrfach absenden; kontaktiere uns notfalls direkt unter info@dein-snackautomat.de.":"Die Anfrage konnte leider nicht bestätigt werden. Bitte schreibe alternativ an info@dein-snackautomat.de.";
   }finally{
     submitButton.disabled=false;
     submitButton.textContent="Unverbindliche B2B-Anfrage senden";
