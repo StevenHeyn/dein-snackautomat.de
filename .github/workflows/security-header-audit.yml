@@ -1,0 +1,31 @@
+name: Sicherheitsheader und HTTPS prüfen
+on:
+  push:
+    paths:
+      - '.github/workflows/security-header-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Öffentliche Sicherheitsheader inspizieren
+        shell: bash
+        run: |
+          set -euo pipefail
+          for target in 'https://dein-snackautomat.de/' 'https://dein-snackautomat.de/kontakt.html'; do
+            echo "::group::$(printf '%s' "$target")"
+            file=$(mktemp)
+            if curl --head --location --silent --show-error --fail --connect-timeout 10 --max-time 20 -D "$file" -o /dev/null "$target"; then
+              grep -Ei '^(HTTP/|strict-transport-security:|content-security-policy:|x-content-type-options:|referrer-policy:|permissions-policy:|x-frame-options:|cache-control:)' "$file" || true
+              for key in strict-transport-security content-security-policy x-content-type-options referrer-policy; do
+                if grep -qi "^$key:" "$file"; then echo "PRESENT: $key"; else echo "MISSING: $key (security finding, not necessarily exploitable)"; fi
+              done
+            else
+              echo "ERROR: HTTPS HEAD request failed; check DNS and CDN."
+            fi
+            rm -f "$file"
+            echo "::endgroup::"
+          done
+          echo "Hinweis: GitHub Pages erlaubt keine beliebigen serverseitigen HTTP-Header. Fehlende Header müssen beim künftigen kommerziellen Hosting/CDN behoben werden."
