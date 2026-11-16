@@ -1,0 +1,17 @@
+name: SEO-Indexierbarkeit der Live-Sitemap prüfen
+on:
+  push:
+    paths:
+      - 'scripts/audit-indexability.py'
+      - '.github/workflows/seo-live-audit.yml'
+      - 'sitemap.xml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sitemap und öffentliche Googlebot-Signale kontrollieren
+        run: python3 scripts/audit-indexability.py
