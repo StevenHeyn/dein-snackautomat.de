@@ -23,7 +23,13 @@ const query=new URLSearchParams(window.location.search);
 const requestedProduct=query.get("produkt");
 const requestedTopic=query.get("thema");
 const requestedCart=query.get("warenkorb");
-const requestedLocationReport=query.get("standortcheck");
+let requestedLocationReport=query.get("standortcheck");
+if(query.get("standortcheck_ref")==="1"){
+ try{
+  const stored=sessionStorage.getItem("dein-snackautomat-standortcheck-anfrage");
+  if(stored){requestedLocationReport=stored;sessionStorage.removeItem("dein-snackautomat-standortcheck-anfrage")}
+ }catch(_){/* Datenschutzeinstellungen können den temporären Speicher deaktivieren. */}
+}
 const requestedAdvice=query.get("beratung");
 // Nur die Seitenkategorie, keine persönlichen URL-Parameter oder Besucherkennung, übermitteln.
 const knownSources={
