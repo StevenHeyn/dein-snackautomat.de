@@ -5,6 +5,8 @@ on:
       - '.github/workflows/public-site-check.yml'
       - 'site-version.json'
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   pruefe-domain:
     runs-on: ubuntu-latest
