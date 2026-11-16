@@ -73,6 +73,9 @@ module.exports = async function handler(req, res) {
   res.setHeader("Cache-Control", "no-store");
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return respond(res, 405, { error: "Methode nicht erlaubt." });
+  const declaredLength = Number(req.headers["content-length"] || 0);
+  if (Number.isFinite(declaredLength) && declaredLength > 32768)
+    return respond(res, 413, { error: "Anfrage zu groß." });
   if (req.headers.origin && req.headers.origin !== origin)
     return respond(res, 403, { error: "Nicht zugelassene Shop-Domain." });
 
@@ -93,7 +96,7 @@ module.exports = async function handler(req, res) {
     const validated = [];
     const seen = new Set();
     for (const item of body.items) {
-      if (!item || typeof item.id !== "string" || seen.has(item.id) ||
+      if (!item || typeof item.id !== "string" || item.id.length > 180 || seen.has(item.id) ||
           !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 30)
         return respond(res, 400, { error: "Ungültige Artikelmenge." });
       seen.add(item.id);
