@@ -1,15 +1,14 @@
 name: SEO-Indexierbarkeit der Live-Sitemap prüfen
 on:
-  push:
-    paths:
-      - 'scripts/audit-indexability.py'
-      - '.github/workflows/seo-live-audit.yml'
-      - 'sitemap.xml'
+  workflow_run:
+    workflows: ["pages build and deployment"]
+    types: [completed]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   pruefen:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
