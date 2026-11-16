@@ -49,6 +49,8 @@
 - `impressum.html` / `datenschutz.html`: `noindex,follow` statt `noindex,nofollow`, damit die gesetzlichen Informationen und ihre Links nicht bewusst von Crawlern abgeschnitten werden.
 - `.github/workflows/website-quality.yml` und `.github/workflows/public-site-check.yml`: Tokenrechte auf `contents: read` eingeschränkt.
 - `scripts/check-site.mjs`: Schutzprüfung auf versehentlich ins Repository eingecheckte Stripe-/Supabase-/GitHub-Secret-Keys und Private Keys.
+- `24-7-kiosk-planer/standortcheck.html` und `kontakt.html`: Übergabe der Standortadresse und Kalkulationsdaten jetzt über einmaliges Session-Storage im selben Browser-Tab statt über eine lange GET-URL. Bei deaktiviertem Browser-Speicher wird auf manuelle Übergabe verwiesen.
+- `checkout-erfolg.html`: `no-referrer` verhindert versehentliche Session-ID-Weitergabe bei Link-Klicks. `index.html`/`kontakt.html` setzen Referrer-Metadaten, der HTTP-Header bleibt eine Aufgabe für den künftigen Host.
 - `.github/workflows/security-header-audit.yml`: tatsächlich ausgelieferte HTTP-Header geprüft. **Startseite und Kontakt: HTTP 200, CSP/HSTS/X-Content-Type-Options/Referrer-Policy fehlen**.
 
 ## D. Priorisierte To-dos bis belastbare Produktionsfreigabe
