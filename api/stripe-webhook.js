@@ -10,9 +10,20 @@
  */
 const { createHmac, timingSafeEqual } = require("node:crypto");
 
+const MAX_WEBHOOK_BYTES = 256 * 1024;
 async function readRaw(req) {
+  let size = 0;
   const chunks = [];
-  for await (const chunk of req) chunks.push(Buffer.from(chunk));
+  for await (const chunk of req) {
+    const item = Buffer.from(chunk);
+    size += item.length;
+    if (size > MAX_WEBHOOK_BYTES) {
+      const error = new Error("Webhook payload exceeds safe size");
+      error.statusCode = 413;
+      throw error;
+    }
+    chunks.push(item);
+  }
   return Buffer.concat(chunks);
 }
 function verify(body, header, secret) {
@@ -34,6 +45,9 @@ function verify(body, header, secret) {
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
   if (!process.env.STRIPE_WEBHOOK_SECRET) return res.status(503).end();
+  const declaredLength = Number(req.headers["content-length"] || 0);
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_WEBHOOK_BYTES)
+    return res.status(413).end();
   try {
     // Disable any automatic JSON body parsing in hosting configuration.
     const raw = await readRaw(req);
@@ -57,6 +71,7 @@ module.exports = async function handler(req, res) {
     }
     return res.status(200).json({ received: true });
   } catch (error) {
+    if (error.statusCode === 413) return res.status(413).end();
     console.error("Webhook error:", error.message);
     return res.status(500).end();
   }
