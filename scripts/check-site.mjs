@@ -57,6 +57,22 @@ for(const u of sitemapUrls){
   if(!paths.has(rel))err("sitemap.xml","missing target "+rel);
  }catch{err("sitemap.xml","invalid URL "+u)}
 }
+// Security regression checks: prevent accidental publication of server secrets.
+const secretIndicators = [
+  { name: "Stripe secret key", re: /\bsk_(?:live|test)_[A-Za-z0-9]{16,}\b/g },
+  { name: "Stripe restricted key", re: /\brk_(?:live|test)_[A-Za-z0-9]{16,}\b/g },
+  { name: "Stripe webhook signing secret", re: /\bwhsec_[A-Za-z0-9]{16,}\b/g },
+  { name: "Supabase secret", re: /\bsb_secret_[A-Za-z0-9_-]{12,}\b/g },
+  { name: "GitHub access token", re: /\bgh[pousr]_[A-Za-z0-9]{25,}\b/g },
+  { name: "private key", re: /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/g }
+];
+for (const p of files.filter(f=>/\.(?:html|js|mjs|json|ya?ml|md|sql|txt|env)$/i.test(f))) {
+  const content=fs.readFileSync(p,"utf8");
+  for(const x of secretIndicators) {
+    x.re.lastIndex=0;
+    if(x.re.test(content))err(p,"Possible committed "+x.name+"; rotate if exposed");
+  }
+}
 const contact=fs.readFileSync("kontakt.html","utf8");
 if(!contact.includes('mailto:info@dein-snackautomat.de'))err("kontakt.html","missing official contact mail link");
 if(!contact.includes('https://api.web3forms.com/submit'))err("kontakt.html","contact API not present");
