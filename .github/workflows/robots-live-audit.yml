@@ -1,0 +1,37 @@
+name: robots.txt und Googlebot-Zugriff prüfen
+on:
+  push:
+    paths:
+      - '.github/workflows/robots-live-audit.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  robots:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prüfe Robots-Regeln und Googlebot-Antworten auf allen Hosts
+        shell: bash
+        run: |
+          set -euo pipefail
+          for host in dein-snackautomat.de www.dein-snackautomat.de; do
+            for agent in 'Mozilla/5.0' 'Googlebot/2.1 (+http://www.google.com/bot.html)'; do
+              file=$(mktemp)
+              headers=$(mktemp)
+              echo "HOST=$host AGENT=$agent"
+              status=$(curl --location --silent --show-error --connect-timeout 10 --max-time 25 --user-agent "$agent" --header 'Cache-Control: no-cache' --dump-header "$headers" --output "$file" --write-out '%{http_code}' "https://$host/robots.txt?robots-audit=$GITHUB_RUN_ID")
+              echo "HTTP=$status; RESPONSE=$(head -c 250 "$file" | tr '\n' '|')"
+              printf 'HEADER_LOCATION='
+              grep -i '^location:' "$headers" | tail -1 || true
+              if [ "$status" != 200 ]; then echo "ERROR robots status $status"; exit 1; fi
+              if ! grep -Fq 'User-agent: *' "$file" || ! grep -Fq 'Allow: /' "$file"; then echo "ERROR expected robots allow rule absent"; exit 1; fi
+              if grep -Eiq '^[[:space:]]*Disallow:[[:space:]]*/[[:space:]]*$' "$file"; then echo "ERROR blanket block detected"; exit 1; fi
+              rm -f "$file" "$headers"
+            done
+          done
+          for page in '/' '/snackautomaten-hamburg.html' '/snackautomaten-berlin.html' '/automatenberater.html'; do
+            status=$(curl --location --silent --show-error --connect-timeout 10 --max-time 25 --user-agent 'Googlebot/2.1 (+http://www.google.com/bot.html)' --output /dev/null --write-out '%{http_code}' "https://dein-snackautomat.de$page")
+            echo "GOOGLEBOT_PATH=$page HTTP=$status"
+            if [ "$status" != 200 ]; then exit 1; fi
+          done
+          echo 'PASS: robots available and no blanket block for tested hosts and user agents.'
