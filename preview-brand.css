@@ -1,0 +1,15 @@
+/* Designvorschau: einheitliche Schwarz-Kupfer-Gold-Palette. Keine Änderungen an Live-Version. */
+:root{--bg:#080809;--surface:#211916;--surface2:#2e211b;--border:#73513b;--text:#f5eee8;--muted:#d7c4b5;--accent:#df9b54;--lime:#df9b54;--dark:#080809;color-scheme:dark}
+body{background:#080809;color:#f5eee8}
+header,footer{background:#080809!important;border-color:#73513b!important}
+header a,nav a{color:#f5eee8}
+header a:hover,nav a:hover,footer a:hover{color:#df9b54}
+.hero{background:radial-gradient(circle at 82% 25%,#56301e,#211511 55%,#080809)!important;color:#f5eee8!important}
+.eyebrow,.tag,.signal{color:#df9b54!important}
+.card,.panel,.result{background:#211916;border-color:#73513b}
+.button,.filter[aria-pressed=true],.btn.primary{background:#df9b54!important;border-color:#df9b54!important;color:#22150b!important}
+.button.secondary{background:transparent!important;color:#eeb985!important;border-color:#af7952!important}
+.filter,.example{background:#30221c;border-color:#73513b;color:#f5eee8}
+.section.alt{background:#150e0a}
+a{color:#eeb985}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid #df9b54;outline-offset:3px}
