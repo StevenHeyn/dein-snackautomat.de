@@ -139,5 +139,12 @@ window.VENDING_WISSEN_ARTICLES=[
     "category": "Kauf & Gerätewahl",
     "description": "Eigentum, Befüllung, Wartung, Warenrisiko und regionale Betreuung vergleichen.",
     "terms": "Fullservice Kantine Mitarbeiter Leasing Miete Kauf"
-  }
+  },
+  {"slug":"sve01-alterskontrolle-einstellen","title":"SVE01: Altersprüfung, Zeitfenster und Auswahlen konfigurieren","category":"Betrieb & Recht","description":"Altersabfrage, Mitternachts-Zeitfenster und Produktauswahlen richtig prüfen.","terms":"SVE01 Alterskontrolle Altersabfrage Altersgrenze Periode Uhrzeit Spiralen"},
+  {"slug":"nayax-firmware-mdb-automat-friert-ein","title":"Automat friert ein: Nayax-Firmware und MDB-Einstellung prüfen","category":"Zahlung & Telemetrie","description":"Dokumentiertes Fehlerbild ab Firmware 4.0.24.5 eingrenzen.","terms":"Nayax Firmware MDB Freeze friert ein Session complete"},
+  {"slug":"carel-hc2-glo-afr-verkabelung","title":"Carel HC2: GLO/AFR und auffällige Relaissteuerung","category":"Kühlung & Wartung","description":"Mögliche Relaisüberlastung und Steuerungsvariante bei Ausfall der Kühlung prüfen.","terms":"Carel IJF IR33 HC2 GLO AFR Verkabelung Kompressor Glykol Relais"},
+  {"slug":"g-drink-ausgabe-greifer","title":"G-Drink: Produkt wird nicht ausgegeben","category":"Ausgabe & Mechanik","description":"Umlenkrolle, Greifer und Etagenerkennung als mögliche Ursachen.","terms":"G Drink DT9 Greifer Umlenkrolle Puffer Feder Etagenerkenner"},
+  {"slug":"nayax-transaktionen-export","title":"Nayax: Transaktionsberichte für die Buchhaltung erstellen","category":"Zahlung & Telemetrie","description":"Verkäufe filtern, Berichtsspalten definieren und nach Excel exportieren.","terms":"Nayax Export Excel Buchhaltung Transaktion Kassenberichte"},
+  {"slug":"carel-ir33-ijf-parameter-glo-afr","title":"Carel IR33/IJF: Fehler AFR und GLO eingrenzen","category":"Kühlung & Wartung","description":"Glykolpumpe und modellspezifische Kühlparameter überprüfen.","terms":"Carel IR33 IJF AFR GLO HC1 HC2 Parameter dP1 dt1"},
+  {"slug":"nayax-dex-daten-fehlen","title":"Nayax DEX: Keine Audit- oder Bargelddaten","category":"Zahlung & Telemetrie","description":"DEX-Verbindung und fehlgeschlagene Auditabfragen diagnostizieren.","terms":"Nayax DEX Kabel AUDIT Bargeld Cash Schnittstelle"}
 ];
