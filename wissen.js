@@ -7,6 +7,8 @@
  const indexed=cards.map(card=>({card,search:normalize(card.dataset.search)}));
  function render(){
    const words=normalize(input.value).split(" ").filter(Boolean);
+   const diagnosis=document.getElementById("wissen-diagnosis-link");
+   if(diagnosis) diagnosis.href="fehlerdiagnose.html"+(input.value.trim()?"?q="+encodeURIComponent(input.value.trim().slice(0,120)):"");
    let shown=0;
    for(const item of indexed){
      const visible=(active==="Alle"||item.card.dataset.category===active)&&words.every(w=>item.search.includes(w));
