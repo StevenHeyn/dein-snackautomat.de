@@ -1,4 +1,4 @@
-/* Designvorschau: einheitliche Schwarz-Kupfer-Gold-Palette. Keine Änderungen an Live-Version. */
+/* Einheitliche Schwarz-Kupfer-Gold-Palette für Wissensdatenbank und Fehlerdiagnose. */
 :root{--bg:#080809;--surface:#211916;--surface2:#2e211b;--border:#73513b;--text:#f5eee8;--muted:#d7c4b5;--accent:#df9b54;--lime:#df9b54;--dark:#080809;color-scheme:dark}
 body{background:#080809;color:#f5eee8}
 header,footer{background:#080809!important;border-color:#73513b!important}
